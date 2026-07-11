@@ -50,7 +50,10 @@ const Intents = require('./Intents');
 /**
  * Options for a client.
  * @typedef {Object} ClientOptions
- * @property {number} [DMChannelVoiceStatusSync=0] The amount of time in milliseconds that the Client to register the event with each DM channel (0=Disable)
+  * @property {string[]} [targetGuildIds=[]] Whitelist of guild IDs to cache and process. Guilds outside this list are
+  * filtered out of the gateway pipeline before any Collection allocation. Newly joined guilds are added automatically.
+  * @property {string[]} [allowedDMs=[]] Whitelist of DM channel IDs whose MESSAGE_CREATE events are processed.
+  * @property {number} [DMChannelVoiceStatusSync=0] The amount of time in milliseconds that the Client to register the event with each DM channel (0=Disable)
  * @property {number} [captchaRetryLimit=3] Captcha retry limit
  * @property {CaptchaSolver} [captchaSolver] Captcha Solver
  * @property {string} [TOTPKey] TOTP key / 2FA Key for two-factor authentication
@@ -162,6 +165,8 @@ class Options extends null {
    */
   static createDefault() {
     return {
+      targetGuildIds: [],
+      allowedDMs: [],
       DMChannelVoiceStatusSync: 0,
       captchaRetryLimit: 3,
       captchaSolver: () => {

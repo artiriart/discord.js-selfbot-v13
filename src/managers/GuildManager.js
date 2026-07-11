@@ -293,6 +293,15 @@ class GuildManager extends CachedManager {
         if (existing) return existing;
       }
 
+      // Fetch defense: block background REST polling for non-whitelisted guilds to stop
+      // automatic caching. Return the cached value (or null) instead of hitting the network.
+      const targetGuildIds = Array.isArray(this.client.options.targetGuildIds)
+        ? this.client.options.targetGuildIds
+        : [];
+      if (!targetGuildIds.includes(id)) {
+        return this.cache.get(id) ?? null;
+      }
+
       const data = await this.client.api.guilds(id).get({ query: { with_counts: options.withCounts ?? true } });
       return this._add(data, options.cache);
     }
