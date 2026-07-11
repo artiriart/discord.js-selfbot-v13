@@ -21,6 +21,19 @@ class CachedManager extends DataManager {
      */
     Object.defineProperty(this, '_cache', { value: this.client.options.makeCache(this.constructor, this.holds) });
 
+    /**
+     * Whether this manager's cache has been disabled via `ClientOptions#disabledManagers`.
+     * When true, `_add` never writes to the cache. The cache itself remains a genuine Collection,
+     * so `get`/`set`/`has`/iteration and sweeper timers keep working normally (no lying proxy).
+     * @type {boolean}
+     * @private
+     * @readonly
+     */
+    const disabledManagers = Array.isArray(this.client.options.disabledManagers)
+      ? this.client.options.disabledManagers
+      : [];
+    Object.defineProperty(this, '_disabled', { value: disabledManagers.includes(this.constructor.name) });
+
     let cleanup = this._cache[_cleanupSymbol]?.();
     if (cleanup) {
       cleanup = cleanup.bind(this._cache);
@@ -51,6 +64,11 @@ class CachedManager extends DataManager {
   }
 
   _add(data, cache = true, { id, extras = [] } = {}) {
+    // Disabled managers: force cache off so nothing is ever retained, but still construct and
+    // return a transient instance so callers that use the return value keep working. We never
+    // touch this.cache with a conditional write, preserving the Collection's Map contract.
+    if (this._disabled) cache = false;
+
     const existing = this.cache.get(id ?? data.id);
     if (existing) {
       if (cache) {
