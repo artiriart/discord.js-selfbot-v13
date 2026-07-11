@@ -22,6 +22,31 @@ const run = (client, guild) => {
 };
 
 module.exports = (client, { d: data }, shard) => {
+  if (!Array.isArray(client.options.targetGuildIds)) client.options.targetGuildIds = [];
+
+  const inCache = client.guilds.cache.has(data.id);
+  const isTargeted = client.options.targetGuildIds.includes(data.id);
+
+  // New Join Exception: a guild not in cache and not yet whitelisted means the client
+  // just joined it. Dynamically whitelist it so it (and its future events) bypass filtration.
+  if (!inCache && !isTargeted) {
+    client.options.targetGuildIds.push(data.id);
+  } else if (!isTargeted) {
+    // Non-targeted guild (present in the payload but not whitelisted): gut its payload
+    // properties before any manager allocates Collections for them.
+    data.channels = [];
+    data.members = [];
+    data.presences = [];
+    data.voice_states = [];
+    data.emojis = [];
+    data.stickers = [];
+    data.threads = [];
+    data.stage_instances = [];
+  }
+
+  // For ALL guilds, strip the roles array to eliminate the role/permission manager footprint.
+  data.roles = [];
+
   let guild = client.guilds.cache.get(data.id);
   run(client, data);
   if (guild) {

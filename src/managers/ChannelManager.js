@@ -121,6 +121,18 @@ class ChannelManager extends CachedManager {
       if (existing && !existing.partial) return existing;
     }
 
+    // Fetch defense: block background REST polling for channels that aren't part of a
+    // whitelisted guild or an allowed DM, stopping automatic background caching.
+    const targetGuildIds = Array.isArray(this.client.options.targetGuildIds)
+      ? this.client.options.targetGuildIds
+      : [];
+    const allowedDMs = Array.isArray(this.client.options.allowedDMs) ? this.client.options.allowedDMs : [];
+    const cached = this.cache.get(id);
+    const inTargetGuild = cached?.guild ? targetGuildIds.includes(cached.guild.id) : false;
+    if (!allowedDMs.includes(id) && !inTargetGuild) {
+      return cached ?? null;
+    }
+
     const data = await this.client.api.channels(id).get();
     return this._add(data, null, { cache, allowUnknownGuild });
   }
