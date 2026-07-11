@@ -20,16 +20,6 @@ const BeforeReadyWhitelist = [
   WSEvents.GUILD_MEMBER_REMOVE,
 ];
 
-// Zero Bloat Policy: noisy, high-frequency events dropped at the packet router entry point.
-const BlockedEvents = new Set([
-  'PRESENCE_UPDATE',
-  'TYPING_START',
-  'GUILD_ROLE_CREATE',
-  'GUILD_ROLE_DELETE',
-  'GUILD_ROLE_UPDATE',
-  'GUILD_MEMBER_UPDATE',
-]);
-
 const UNRECOVERABLE_CLOSE_CODES = Object.keys(WSCodes).slice(2).map(Number);
 const UNRESUMABLE_CLOSE_CODES = [
   RPCErrorCodes.UnknownError,
@@ -337,9 +327,6 @@ class WebSocketManager extends EventEmitter {
    * @private
    */
   handlePacket(packet, shard) {
-    // High-performance event filter: drop noisy, high-frequency events before any routing.
-    if (packet && BlockedEvents.has(packet.t)) return false;
-
     if (packet && this.status !== Status.READY) {
       if (!BeforeReadyWhitelist.includes(packet.t)) {
         this.packetQueue.push({ packet, shard });
