@@ -24,13 +24,6 @@ module.exports = (client, { d: data }, shard) => {
     client.channels._add(private_channel);
   }
 
-  // Zero Bloat Policy: filter the incoming guilds array before any manager maps it.
-  // Only retain guild objects whose IDs are whitelisted in client.options.targetGuildIds.
-  if (!Array.isArray(client.options.targetGuildIds)) client.options.targetGuildIds = [];
-  if (Array.isArray(data.guilds)) {
-    data.guilds = data.guilds.filter(guild => client.options.targetGuildIds.includes(guild.id));
-  }
-
   for (const guild of data.guilds) {
     guild.shardId = shard.id;
     client.guilds._add(guild);

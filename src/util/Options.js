@@ -50,16 +50,7 @@ const Intents = require('./Intents');
 /**
  * Options for a client.
  * @typedef {Object} ClientOptions
-  * @property {string[]} [targetGuildIds=[]] Whitelist of guild IDs to cache and process. Guilds outside this list are
-  * filtered out of the gateway pipeline before any Collection allocation. Newly joined guilds are added automatically.
-  * @property {string[]} [allowedDMs=[]] Whitelist of DM channel IDs whose MESSAGE_CREATE events are processed.
-  * @property {string[]} [disabledManagers=[]] Names of `CachedManager` subclasses (e.g. `'PresenceManager'`,
-  * `'RoleManager'`, `'PermissionOverwriteManager'`, `'GuildEmojiManager'`, `'GuildStickerManager'`) whose caches
-  * should never retain entries. The store stays a genuine Collection (so the Map contract, iteration, and sweepers
-  * are unaffected); only writes through `_add` are skipped, so no data is ever cached for these managers.
-  * <warn>Disabling `RoleManager` or `PermissionOverwriteManager` will break permission calculations that depend on
-  * the `@everyone` role and channel overwrites. Only disable managers whose data you do not need.</warn>
-  * @property {number} [DMChannelVoiceStatusSync=0] The amount of time in milliseconds that the Client to register the event with each DM channel (0=Disable)
+ * @property {number} [DMChannelVoiceStatusSync=0] The amount of time in milliseconds that the Client to register the event with each DM channel (0=Disable)
  * @property {number} [captchaRetryLimit=3] Captcha retry limit
  * @property {CaptchaSolver} [captchaSolver] Captcha Solver
  * @property {string} [TOTPKey] TOTP key / 2FA Key for two-factor authentication
@@ -171,9 +162,6 @@ class Options extends null {
    */
   static createDefault() {
     return {
-      targetGuildIds: [],
-      allowedDMs: [],
-      disabledManagers: [],
       DMChannelVoiceStatusSync: 0,
       captchaRetryLimit: 3,
       captchaSolver: () => {
